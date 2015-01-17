@@ -263,7 +263,7 @@ inline float64 b2DistanceSquared(const Vec2& a, const Vec2& b)
  * be found.  Consider the case of a target moving away
  * from the shooter faster than the speed of the
  * projectile and you will see at least one case where
- * this can calculation may fail.
+ * this calculation may fail.
  */
 bool CalculateInterceptShotPosition(const Vec2& pShooter,
                                     const Vec2& pTarget0,
@@ -310,17 +310,30 @@ bool CalculateInterceptShotPosition(const Vec2& pShooter,
       }
       
       if (discriminant > 0)
-      {  // Two solutions.  Pick the smaller one.
+      {  // Two solutions.  Pick the smaller positive one.
          // Calculate the quadratic.
          float64 quad = sqrt(discriminant);
          float64 tBullet1 = (-b + quad)/(2*a);
          float64 tBullet2 = (-b - quad)/(2*a);
-         if(tBullet1 < tBullet2 && tBullet1 >= 0)
-         {
+         if((tBullet1 < 0) && (tBullet2 < 0))
+         {  // This would be really odd.
+            // Both times are negative.
+            return false;
+         }
+         else if(tBullet2 < 0 && tBullet1 >= 0)
+         {  // One negative, one positive.
+            tBullet = tBullet1;
+         }
+         else if(tBullet1 < 0 && tBullet2 >= 0)
+         {  // One negative, one positive.
+            tBullet = tBullet2;
+         }
+         else if(tBullet1 < tBullet2)
+         {  // First less than second
             tBullet = tBullet1;
          }
          else
-         {
+         {  // Only choice left
             tBullet = tBullet2;
          }
       }
